@@ -1,0 +1,37 @@
+---
+title: "Project2"
+author: "Oliver Benton Javier"
+date: "February 14, 2015"
+output: html_document
+---
+
+# Connect data frame to server
+
+```{r}
+food <- data.frame(eval(parse(text=substring(getURL(URLencode('http://129.152.144.84:5001/rest/native/?query="select * from MyCSV"'), httpheader=c(DB='jdbc:oracle:thin:@129.152.144.84:1521:ORCL', USER='C##cs329e_obj66', PASS='orcl_obj66', MODE='native_mode', MODEL='model', returnFor = 'R', returnDimensions = 'False'), verbose = TRUE), 1, 2^31-1))))
+```
+
+# Show the subset of the data
+
+```{r}
+print(tbl_df(food))
+```
+
+# Produce 3 interested data wrangling sets of operations using %>%
+# What country produces the most food and least food
+food  %>% select(COUNTRY, ITEM, UNIT, AMOUNT)  %>% summarise((min_am == min(AMOUNT)),  ITEM == "Food Supply", UNIT == "Grain Equiv. 1000 MT")
+
+# Find bottom 20% of countries that have low food supply
+food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% tbl_df()
+
+# Find top 20% of countries that have high food supply
+food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent >= .80) %>% arrange(desc(amount_percent)) %>% tbl_df()
+
+# Plot bottom 20% 
+food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% ggplot(aes(x = COUNTRY, y = amount_percent)) + geom_point() 
+
+
+# Arrange table to show economic data for the USA
+# Arrange table to show economic data for another country
+
+# Produce interesting visualizations of wrangled data set
