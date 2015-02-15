@@ -1,0 +1,16 @@
+{
+    "contents" : "---\ntitle: \"Project2\"\nauthor: \"Oliver Benton Javier\"\ndate: \"February 14, 2015\"\noutput: html_document\n---\n\n# Connect data frame to server\n\n```{r}\nfood <- data.frame(eval(parse(text=substring(getURL(URLencode('http://129.152.144.84:5001/rest/native/?query=\"select * from MyCSV\"'), httpheader=c(DB='jdbc:oracle:thin:@129.152.144.84:1521:ORCL', USER='C##cs329e_obj66', PASS='orcl_obj66', MODE='native_mode', MODEL='model', returnFor = 'R', returnDimensions = 'False'), verbose = TRUE), 1, 2^31-1))))\n```\n\n# Show the subset of the data\n\n```{r}\nprint(tbl_df(food))\n```\n\n# Produce 3 interested data wrangling sets of operations using %>%\n# What country produces the most food and least food\nfood  %>% select(COUNTRY, ITEM, UNIT, AMOUNT)  %>% summarise((min_am == min(AMOUNT)),  ITEM == \"Food Supply\", UNIT == \"Grain Equiv. 1000 MT\")\n\n# Find bottom 20% of countries that have low food supply\nfood %>% filter(ITEM == \"Food Supply\") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% tbl_df()\n\n# Find top 20% of countries that have high food supply\nfood %>% filter(ITEM == \"Food Supply\") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent >= .80) %>% arrange(desc(amount_percent)) %>% tbl_df()\n\n# Plot bottom 20% \nfood %>% filter(ITEM == \"Food Supply\") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% ggplot(aes(x = COUNTRY, y = amount_percent)) + geom_point() \n\n\n# Arrange table to show economic data for the USA\n# Arrange table to show economic data for another country\n\n# Produce interesting visualizations of wrangled data set\n",
+    "created" : 1424041173706.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1501742537",
+    "id" : "29954E8E",
+    "lastKnownWriteTime" : 1423961282,
+    "path" : "~/Documents/Spring 2015/CS 329E/DataVisualization/DV_RProject2/00 Doc/Project2.Rmd",
+    "project_path" : "00 Doc/Project2.Rmd",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}
