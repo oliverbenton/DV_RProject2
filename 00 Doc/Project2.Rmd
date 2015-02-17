@@ -1,37 +1,54 @@
----
-title: "Project2"
-author: "Oliver Benton Javier"
-date: "February 14, 2015"
-output: html_document
----
+Project 2
+====
+**Group members: Fabiana Latorre, Oliver Benton Javier, Ernesto Canales, and Nikolaj Plagborg-Moller.**  
 
-# Connect data frame to server
+Our dataset can be found at 'http://catalog.data.gov/dataset/international-food-security'.
+
+We load the data-table into a variable named 'df' and display a subset of the data (as an exception, we used the 'head' function instead of 'tbl_df', since 'tbl_df' does not display every column).
+  
+```{r}
+source('../01 Data/Fetching_data.R', echo=TRUE)
+```
+  
+A challenge with our data is that the attributes of each country are separated into many different rows. We therefore thought of using the 'spread' functionality to gather attributes on different rows into separate columns in the same row. We chose the year 2005, and the attributes 'Total Food Aid' and 'Total Population'. We arranged the data by descending population.
+  
+```{r}
+source('../02 Data Wrangling/Wrangling1.R', echo=TRUE)
+```
+  
+One thing we noticed when using the 'spread' functionality to reshape the data, is that it creates a column name with a whitespace between 'Food' and 'Aid'. Unfortunately, many other functions cannot read whitespace, not even the 'rename' function, so it is very limited what you can do with this column, since other functions do not recognize the column name. We therefore cannot use the 'Food Aid' column in a ggplot, so instead we took the opportunity to try the 3D-plotting package, since it can receive column numbers instead of names. It might not make that much sense to plot this data in 3D, but we did it to experiment with the 3D-package.
 
 ```{r}
-food <- data.frame(eval(parse(text=substring(getURL(URLencode('http://129.152.144.84:5001/rest/native/?query="select * from MyCSV"'), httpheader=c(DB='jdbc:oracle:thin:@129.152.144.84:1521:ORCL', USER='C##cs329e_obj66', PASS='orcl_obj66', MODE='native_mode', MODEL='model', returnFor = 'R', returnDimensions = 'False'), verbose = TRUE), 1, 2^31-1))))
+source('../03 Visualizations/Visualization1.R', echo=TRUE)
+```
+  
+Country names are converted to numbers, so it appears that the 3D-plot package is supposed to receive only numerical data. Comparing the 3D-plot with the data table, we can identify India and Sudan as the two outliers with respect to population size and amount of aid received.
+
+For the next data wrangling, we are comparing the amount of different kinds of aid given to three countries over a time period of 4 years. The data was arranged according to country, year, and item type respectively.
+  
+```{r}
+source('../02 Data Wrangling/Wrangling2.R', echo=TRUE)
+```
+  
+The data is visualized below using ggplot.
+  
+```{r}
+source('../03 Visualizations/Visualization2.R', echo=TRUE)
 ```
 
-# Show the subset of the data
+From the graph we can see that Angola receives by far more aid than the other two countries, and most of this food is cereal as opposed to non-cereal. We can also see that each country receives somewhat the same level of non-cereal aid, although Angola still receives more.
+
+Our next data wrangling filters the rows that include total food aid, and groups the rows by year. We used summarise to calculate the total aid received by all countries in the set for each year.
+```{r}
+source('../02 Data Wrangling/Wrangling3.R', echo=TRUE)
+```
+
+We plot the total aid received by all countries each year over time.
 
 ```{r}
-print(tbl_df(food))
+source('../03 Visualizations/Visualization3.R', echo=TRUE)
 ```
 
-# Produce 3 interested data wrangling sets of operations using %>%
-# What country produces the most food and least food
-food  %>% select(COUNTRY, ITEM, UNIT, AMOUNT)  %>% summarise((min_am == min(AMOUNT)),  ITEM == "Food Supply", UNIT == "Grain Equiv. 1000 MT")
+We were surprised to see that the total amount of aid received has declined considerably throughout time. Maybe the countries are better off now than they used to be and therefore need less aid.
 
-# Find bottom 20% of countries that have low food supply
-food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% tbl_df()
-
-# Find top 20% of countries that have high food supply
-food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent >= .80) %>% arrange(desc(amount_percent)) %>% tbl_df()
-
-# Plot bottom 20% 
-food %>% filter(ITEM == "Food Supply") %>% select(COUNTRY, ITEM, AMOUNT) %>% mutate(amount_percent = cume_dist(AMOUNT)) %>% filter(amount_percent <= .20) %>% arrange(desc(amount_percent)) %>% ggplot(aes(x = COUNTRY, y = amount_percent)) + geom_point() 
-
-
-# Arrange table to show economic data for the USA
-# Arrange table to show economic data for another country
-
-# Produce interesting visualizations of wrangled data set
+- THE END
